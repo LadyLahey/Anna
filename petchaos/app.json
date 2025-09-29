@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "PetChaos",
+    "slug": "petchaos",
+    "scheme": "petchaos",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#0e0f12"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.example.petchaos"
+    },
+    "android": {
+      "package": "com.example.petchaos"
+    },
+    "extra": {},
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}
+
