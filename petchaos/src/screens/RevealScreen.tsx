@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, Image } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
-import { useAppState } from '../state/AppState';
+import { getPet } from '../state/petState';
+import { Pet } from '../types/pet';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Reveal'>;
 
 export default function RevealScreen({ navigation }: Props) {
-	const { pet } = useAppState();
+    const [pet, setPet] = useState<Pet | null>(null);
+    useEffect(() => { (async () => setPet(await getPet()))(); }, []);
 
 	if (!pet) {
 		return (
@@ -24,11 +26,11 @@ export default function RevealScreen({ navigation }: Props) {
 		<View style={styles.container}>
 			<Text style={styles.title}>🎉 Your Pet Appears!</Text>
 			<View style={styles.card}>
-				<View style={styles.headerRow}>
-					<Text style={styles.petName}>{pet.name}</Text>
-					{pet.mediaThumbUri ? <Image source={{ uri: pet.mediaThumbUri }} style={styles.thumb} /> : null}
-				</View>
-				<Text style={styles.petMeta}>Species: {pet.species}</Text>
+                <View style={styles.headerRow}>
+                    <Text style={styles.petName}>{pet.species}</Text>
+                    {pet.mediaThumb ? <Image source={{ uri: pet.mediaThumb }} style={styles.thumb} /> : null}
+                </View>
+                <Text style={styles.petMeta}>Species: {pet.species}</Text>
 				<Text style={styles.petMeta}>Stage: {pet.stage}</Text>
 				<View style={styles.traitsRow}>
 					{pet.traits.map(t => (

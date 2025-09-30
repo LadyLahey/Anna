@@ -2,37 +2,50 @@ import React, { useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
-import { useAppState } from '../state/AppState';
+import { getInventory, getPet, saveInventory, savePet } from '../state/petState';
 import { mutatePet } from '../engine/petEngine';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Store'>;
 
 export default function StoreScreen({ navigation }: Props) {
-	const { pet, setPet, tokens, addTokens, spendToken } = useAppState();
-	const [message, setMessage] = useState<string | null>(null);
+    const [tokens, setTokens] = useState<number>(0);
+    const [message, setMessage] = useState<string | null>(null);
 
-	const mockPurchase = () => {
-		addTokens(5);
-		setMessage('Purchased 5 Chaos Tokens (mock)!');
-	};
+    React.useEffect(() => { (async () => { const inv = await getInventory(); setTokens(inv.tokens); })(); }, []);
 
-	const mockPurchase20 = () => {
-		addTokens(20);
-		setMessage('Purchased 20 Chaos Tokens (mock)!');
-	};
+    const mockPurchase = async () => {
+        const inv = await getInventory();
+        inv.tokens += 5;
+        await saveInventory(inv);
+        setTokens(inv.tokens);
+        setMessage('Purchased 5 Chaos Tokens (mock)!');
+    };
 
-	const rerollMutation = () => {
-		if (!pet) return setMessage('You need a pet first.');
-		if (!spendToken(1)) return setMessage('Not enough tokens.');
-		const next = mutatePet(pet, 1);
-		setPet(next);
-		setMessage('Mutation applied!');
-	};
+    const mockPurchase20 = async () => {
+        const inv = await getInventory();
+        inv.tokens += 20;
+        await saveInventory(inv);
+        setTokens(inv.tokens);
+        setMessage('Purchased 20 Chaos Tokens (mock)!');
+    };
+
+    const rerollMutation = async () => {
+        const pet = await getPet();
+        if (!pet) return setMessage('You need a pet first.');
+        const inv = await getInventory();
+        if (inv.tokens <= 0) return setMessage('Not enough tokens.');
+        inv.tokens -= 1;
+        await saveInventory(inv);
+        setTokens(inv.tokens);
+        const next = mutatePet({ ...pet, traits: pet.traits }, 1) as any;
+        await savePet({ ...pet, stage: next.stage, traits: next.traits });
+        setMessage('Mutation applied!');
+    };
 
 	return (
 		<View style={styles.container}>
 			<Text style={styles.title}>🛒 Chaos Store (Mock)</Text>
-			<Text style={styles.meta}>Tokens: {tokens}</Text>
+            <Text style={styles.meta}>Tokens: {tokens}</Text>
 			<View style={styles.row}>
 				<Pressable style={[styles.buy, { marginRight: 12 }]} onPress={mockPurchase}><Text style={styles.buyText}>Buy 5 Tokens</Text></Pressable>
 				<Pressable style={[styles.buy, { marginRight: 12, backgroundColor: '#16a34a' }]} onPress={mockPurchase20}><Text style={styles.buyText}>Buy 20 Tokens</Text></Pressable>

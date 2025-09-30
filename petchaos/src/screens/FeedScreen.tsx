@@ -4,7 +4,8 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
 import { isTextSafe, sanitize } from '../services/filters';
 import { generatePetFromText } from '../engine/petEngine';
-import { useAppState } from '../state/AppState';
+import { savePet } from '../state/petState';
+import { Pet as ProfilePet } from '../types/pet';
 import FeedMedia, { MediaSelection } from '../components/FeedMedia';
 import { analyzeImage } from '../services/ai/vision';
 import { analyzeAudio } from '../services/ai/audio';
@@ -17,8 +18,7 @@ export default function FeedScreen({ navigation }: Props) {
 	const [input, setInput] = useState('');
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
-	const [media, setMedia] = useState<MediaSelection>({});
-	const { setPet } = useAppState();
+    const [media, setMedia] = useState<MediaSelection>({});
 
 	const onGenerate = async () => {
 		const clean = sanitize(input);
@@ -27,18 +27,38 @@ export default function FeedScreen({ navigation }: Props) {
 
 		setLoading(true);
 		try {
-			if (media.imageUri || media.audioUri) {
+            if (media.imageUri || media.audioUri) {
 				const summary = media.imageUri ? await analyzeImage(media.imageUri) : await analyzeAudio(media.audioUri as string);
 				const mix = mixTraits(summary);
 				const seedText = clean || (summary.topics.join(' ') + ' ' + summary.keywords.join(' '));
-				let pet = generatePetFromText(seedText);
-				pet = { ...pet, species: mix.species, traits: Array.from(new Set([...pet.traits, ...mix.traits])), stage: Math.min(3, pet.stage + mix.stageDelta), mediaThumbUri: media.imageUri || undefined };
-				setPet(pet);
+                const base = generatePetFromText(seedText);
+                const pet: ProfilePet = {
+                    id: base.id,
+                    species: mix.species,
+                    stage: Math.min(3, base.stage + mix.stageDelta),
+                    xp: 0,
+                    level: 1,
+                    stats: { hunger: 50, happiness: 50, energy: 50 },
+                    traits: Array.from(new Set([...base.traits, ...mix.traits])),
+                    lastFedAt: Date.now(),
+                    mediaThumb: media.imageUri
+                };
+                await savePet(pet);
 				await pushHistory({ createdAt: Date.now(), imageUri: media.imageUri, audioUri: media.audioUri, result: summary });
 				navigation.replace('Reveal');
 			} else {
-				const pet = generatePetFromText(clean);
-				setPet(pet);
+                const base = generatePetFromText(clean);
+                const pet: ProfilePet = {
+                    id: base.id,
+                    species: base.species,
+                    stage: base.stage,
+                    xp: 0,
+                    level: 1,
+                    stats: { hunger: 50, happiness: 50, energy: 50 },
+                    traits: base.traits,
+                    lastFedAt: Date.now()
+                };
+                await savePet(pet);
 				navigation.replace('Reveal');
 			}
 		} catch (e) {
