@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, Image, Alert } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
 import PetCanvas from '../visual/PetCanvas';
-import ShareCard from '../visual/ShareCard';
+import ShareCard, { ShareCardHandle } from '../visual/ShareCard';
 import * as Sharing from 'expo-sharing';
 import { addXp, changeStat, getInventory, getPet, saveInventory, savePet, xpForAction } from '../state/petState';
 import { Pet } from '../types/pet';
@@ -126,14 +126,27 @@ export default function PetProfileScreen({ navigation }: any) {
 				<Pressable style={styles.btn} onPress={() => navigation.navigate('Store')}><Text style={styles.btnText}>Store</Text></Pressable>
 			</View>
 			<View style={styles.actions}>
-				<Pressable style={styles.btn} onPress={async () => {
-					const onCapture = async (uri: string) => { if (await Sharing.isAvailableAsync()) { await Sharing.shareAsync(uri); } };
-					// Render a share card off-screen and capture
-					// For simplicity we render inline and capture immediately
-				}}><Text style={styles.btnText}>Share Pet</Text></Pressable>
+				<ShareButton pet={pet} />
 			</View>
 		</View>
 	);
+}
+
+function ShareButton({ pet }: { pet: Pet }) {
+    const ref = React.useRef<ShareCardHandle>(null);
+    return (
+        <>
+            <ShareCard ref={ref} pet={pet} onCapture={() => {}} />
+            <Pressable style={styles.btn} onPress={async () => {
+                const uri = await ref.current?.capture();
+                if (uri && (await Sharing.isAvailableAsync())) {
+                    await Sharing.shareAsync(uri);
+                }
+            }}>
+                <Text style={styles.btnText}>Share Pet</Text>
+            </Pressable>
+        </>
+    );
 }
 
 const styles = StyleSheet.create({

@@ -1,16 +1,21 @@
-import React, { useRef } from 'react';
+import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import ViewShot from 'react-native-view-shot';
 import PetCanvas from './PetCanvas';
 
-export default function ShareCard({ pet, onCapture }: { pet: any; onCapture: (uri: string) => void }) {
-	const ref = useRef<ViewShot>(null);
-	const capture = async () => {
-		const uri = await ref.current?.capture?.({ format: 'png', quality: 1 });
-		if (uri) onCapture(uri);
-	};
-	return (
-		<ViewShot ref={ref} options={{ format: 'png', quality: 1 }}>
+export type ShareCardHandle = { capture: () => Promise<string | undefined> };
+
+const ShareCard = forwardRef<ShareCardHandle, { pet: any; onCapture: (uri: string) => void }>(function ShareCard({ pet, onCapture }, ref) {
+    const vsRef = useRef<ViewShot>(null);
+    useImperativeHandle(ref, () => ({
+        async capture() {
+            const uri = await vsRef.current?.capture?.({ format: 'png', quality: 1 });
+            if (uri) onCapture(uri);
+            return uri as string | undefined;
+        }
+    }));
+    return (
+        <ViewShot ref={vsRef} options={{ format: 'png', quality: 1 }}>
 			<View style={styles.card}>
 				<Text style={styles.logo}>PetChaos</Text>
 				<View style={{ alignItems: 'center', marginVertical: 8 }}>
@@ -22,9 +27,11 @@ export default function ShareCard({ pet, onCapture }: { pet: any; onCapture: (ur
 				</View>
 				<Text style={styles.water}>@petchaos</Text>
 			</View>
-		</ViewShot>
-	);
-}
+        </ViewShot>
+    );
+});
+
+export default ShareCard;
 
 const styles = StyleSheet.create({
 	card: { width: 320, backgroundColor: 'white', borderRadius: 16, padding: 12, alignItems: 'center' },
