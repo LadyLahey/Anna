@@ -16,6 +16,11 @@ export default function StoreScreen({ navigation }: Props) {
 		setMessage('Purchased 5 Chaos Tokens (mock)!');
 	};
 
+	const mockPurchase20 = () => {
+		addTokens(20);
+		setMessage('Purchased 20 Chaos Tokens (mock)!');
+	};
+
 	const rerollMutation = () => {
 		if (!pet) return setMessage('You need a pet first.');
 		if (!spendToken(1)) return setMessage('Not enough tokens.');
@@ -30,6 +35,7 @@ export default function StoreScreen({ navigation }: Props) {
 			<Text style={styles.meta}>Tokens: {tokens}</Text>
 			<View style={styles.row}>
 				<Pressable style={[styles.buy, { marginRight: 12 }]} onPress={mockPurchase}><Text style={styles.buyText}>Buy 5 Tokens</Text></Pressable>
+				<Pressable style={[styles.buy, { marginRight: 12, backgroundColor: '#16a34a' }]} onPress={mockPurchase20}><Text style={styles.buyText}>Buy 20 Tokens</Text></Pressable>
 				<Pressable style={styles.reroll} onPress={rerollMutation}><Text style={styles.rerollText}>Reroll Mutation (-1)</Text></Pressable>
 			</View>
 			{message ? <Text style={styles.msg}>{message}</Text> : null}

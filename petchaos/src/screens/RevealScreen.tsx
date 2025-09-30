@@ -36,8 +36,8 @@ export default function RevealScreen({ navigation }: Props) {
 					))}
 				</View>
 			</View>
-			<Pressable style={styles.button} onPress={() => navigation.navigate('Store')}>
-				<Text style={styles.buttonText}>Go to Store</Text>
+			<Pressable style={styles.button} onPress={() => navigation.navigate('PetProfile')}>
+				<Text style={styles.buttonText}>Open Pet</Text>
 			</Pressable>
 		</View>
 	);
