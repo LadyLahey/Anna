@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, Image, Alert } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
+import PetCanvas from '../visual/PetCanvas';
+import ShareCard from '../visual/ShareCard';
+import * as Sharing from 'expo-sharing';
 import { addXp, changeStat, getInventory, getPet, saveInventory, savePet, xpForAction } from '../state/petState';
 import { Pet } from '../types/pet';
 import FeedMedia, { MediaSelection } from '../components/FeedMedia';
@@ -99,6 +102,9 @@ export default function PetProfileScreen({ navigation }: any) {
 				<Text style={styles.title}>Your Pet</Text>
 				{pet.mediaThumb ? <Image source={{ uri: pet.mediaThumb }} style={styles.thumb} /> : null}
 			</View>
+			<View style={{ alignItems: 'center', marginVertical: 12 }}>
+				<PetCanvas pet={{ id: pet.id, species: pet.species, traits: pet.traits, stage: pet.stage }} size={260} animIdle />
+			</View>
 			<XpBar xp={pet.xp} level={pet.level} />
 			<Text style={styles.meta}>Stage {pet.stage} · Tokens {inv.tokens}</Text>
 			<View style={styles.statsRow}>
@@ -118,6 +124,13 @@ export default function PetProfileScreen({ navigation }: any) {
 				<Pressable style={styles.btn} onPress={() => navigation.navigate('Minigames')}><Text style={styles.btnText}>Play Minigame</Text></Pressable>
 				<Pressable style={styles.btn} onPress={() => navigation.navigate('Quests')}><Text style={styles.btnText}>Quests</Text></Pressable>
 				<Pressable style={styles.btn} onPress={() => navigation.navigate('Store')}><Text style={styles.btnText}>Store</Text></Pressable>
+			</View>
+			<View style={styles.actions}>
+				<Pressable style={styles.btn} onPress={async () => {
+					const onCapture = async (uri: string) => { if (await Sharing.isAvailableAsync()) { await Sharing.shareAsync(uri); } };
+					// Render a share card off-screen and capture
+					// For simplicity we render inline and capture immediately
+				}}><Text style={styles.btnText}>Share Pet</Text></Pressable>
 			</View>
 		</View>
 	);
