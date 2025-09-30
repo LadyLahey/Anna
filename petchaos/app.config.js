@@ -3,6 +3,7 @@ import 'dotenv/config';
 
 export default ({ config }) => ({
 	...config,
+	entryPoint: './index.js',
 	extra: {
 		AI_PROVIDER: process.env.AI_PROVIDER || 'mock',
 		OPENAI_API_KEY: process.env.OPENAI_API_KEY || ''
