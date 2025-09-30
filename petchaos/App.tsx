@@ -11,16 +11,7 @@ import PetProfileScreen from './src/screens/PetProfileScreen';
 import MinigamesScreen from './src/screens/MinigamesScreen';
 import QuestsScreen from './src/screens/QuestsScreen';
 import { AppStateProvider } from './src/state/AppState';
-
-export type RootStackParamList = {
-	Hatch: undefined;
-	Feed: undefined;
-	Reveal: undefined;
-	Store: undefined;
-	PetProfile: undefined;
-	Minigames: undefined;
-	Quests: undefined;
-};
+import { RootStackParamList } from './src/navigation/types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
