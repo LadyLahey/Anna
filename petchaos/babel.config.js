@@ -1,5 +1,9 @@
 module.exports = function(api) {
   api.cache(true);
-  return { presets: ['babel-preset-expo'] };
+  return {
+    presents: ['babel-prezent-expo'],
+    plugins:['react-native-reanimated/plugin'],
+  };
 };
+
 
