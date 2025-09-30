@@ -5,6 +5,7 @@ export type Pet = {
 	species: PetSpecies;
 	stage: number;
 	traits: string[];
+	mediaThumbUri?: string;
 };
 
 const speciesKeywords: Record<PetSpecies, string[]> = {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Image } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
 import { useAppState } from '../state/AppState';
@@ -24,10 +24,17 @@ export default function RevealScreen({ navigation }: Props) {
 		<View style={styles.container}>
 			<Text style={styles.title}>🎉 Your Pet Appears!</Text>
 			<View style={styles.card}>
-				<Text style={styles.petName}>{pet.name}</Text>
+				<View style={styles.headerRow}>
+					<Text style={styles.petName}>{pet.name}</Text>
+					{pet.mediaThumbUri ? <Image source={{ uri: pet.mediaThumbUri }} style={styles.thumb} /> : null}
+				</View>
 				<Text style={styles.petMeta}>Species: {pet.species}</Text>
 				<Text style={styles.petMeta}>Stage: {pet.stage}</Text>
-				<Text style={styles.petTraits}>Traits: {pet.traits.join(', ')}</Text>
+				<View style={styles.traitsRow}>
+					{pet.traits.map(t => (
+						<View key={t} style={styles.traitChip}><Text style={styles.traitText}>{t}</Text></View>
+					))}
+				</View>
 			</View>
 			<Pressable style={styles.button} onPress={() => navigation.navigate('Store')}>
 				<Text style={styles.buttonText}>Go to Store</Text>
@@ -42,9 +49,13 @@ const styles = StyleSheet.create({
 	card: { backgroundColor: '#0b1220', borderColor: '#1f2937', borderWidth: 1, padding: 16, borderRadius: 12 },
 	petName: { color: 'white', fontSize: 22, fontWeight: '800', marginBottom: 8 },
 	petMeta: { color: '#cbd5e1', marginBottom: 4 },
-	petTraits: { color: '#a1a1aa', marginTop: 8 },
+	traitsRow: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 8 },
+	traitChip: { backgroundColor: '#1f2937', borderRadius: 999, paddingVertical: 4, paddingHorizontal: 10, marginRight: 6, marginBottom: 6 },
+	traitText: { color: 'white', fontWeight: '700' },
 	button: { marginTop: 20, backgroundColor: '#7c3aed', paddingVertical: 12, borderRadius: 10, alignItems: 'center' },
 	buttonText: { color: 'white', fontWeight: '800', fontSize: 16 },
-	empty: { color: '#cbd5e1', fontSize: 16, marginBottom: 12 }
+	empty: { color: '#cbd5e1', fontSize: 16, marginBottom: 12 },
+	headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+	thumb: { width: 40, height: 40, borderRadius: 8 }
 });
 

@@ -1,25 +1,51 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
 import { isTextSafe, sanitize } from '../services/filters';
 import { generatePetFromText } from '../engine/petEngine';
 import { useAppState } from '../state/AppState';
+import FeedMedia, { MediaSelection } from '../components/FeedMedia';
+import { analyzeImage } from '../services/ai/vision';
+import { analyzeAudio } from '../services/ai/audio';
+import { mixTraits } from '../services/petMixer';
+import { pushHistory } from '../services/history';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Feed'>;
 
 export default function FeedScreen({ navigation }: Props) {
 	const [input, setInput] = useState('');
 	const [error, setError] = useState<string | null>(null);
+	const [loading, setLoading] = useState(false);
+	const [media, setMedia] = useState<MediaSelection>({});
 	const { setPet } = useAppState();
 
-	const onGenerate = () => {
+	const onGenerate = async () => {
 		const clean = sanitize(input);
-		if (!clean) return setError('Please enter a short description or vibe.');
-		if (!isTextSafe(clean)) return setError('That input looks unsafe. Try different words.');
-		const pet = generatePetFromText(clean);
-		setPet(pet);
-		navigation.replace('Reveal');
+		if (!clean && !media.imageUri && !media.audioUri) return setError('Type something or attach media.');
+		if (clean && !isTextSafe(clean)) return setError('That input looks unsafe. Try different words.');
+
+		setLoading(true);
+		try {
+			if (media.imageUri || media.audioUri) {
+				const summary = media.imageUri ? await analyzeImage(media.imageUri) : await analyzeAudio(media.audioUri as string);
+				const mix = mixTraits(summary);
+				const seedText = clean || (summary.topics.join(' ') + ' ' + summary.keywords.join(' '));
+				let pet = generatePetFromText(seedText);
+				pet = { ...pet, species: mix.species, traits: Array.from(new Set([...pet.traits, ...mix.traits])), stage: Math.min(3, pet.stage + mix.stageDelta), mediaThumbUri: media.imageUri || undefined };
+				setPet(pet);
+				await pushHistory({ createdAt: Date.now(), imageUri: media.imageUri, audioUri: media.audioUri, result: summary });
+				navigation.replace('Reveal');
+			} else {
+				const pet = generatePetFromText(clean);
+				setPet(pet);
+				navigation.replace('Reveal');
+			}
+		} catch (e) {
+			setError('Analysis failed. Try again or use Mock Analysis.');
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	return (
@@ -34,9 +60,10 @@ export default function FeedScreen({ navigation }: Props) {
 				style={styles.input}
 				multiline
 			/>
+			<FeedMedia value={media} onChange={setMedia} />
 			{error ? <Text style={styles.error}>{error}</Text> : null}
-			<Pressable style={styles.button} onPress={onGenerate}>
-				<Text style={styles.buttonText}>Reveal Pet</Text>
+			<Pressable style={styles.button} onPress={onGenerate} disabled={loading}>
+				<Text style={styles.buttonText}>{loading ? 'Your pet is munching on the meme…' : 'Reveal Pet'}</Text>
 			</Pressable>
 		</View>
 	);
