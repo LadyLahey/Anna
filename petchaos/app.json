@@ -1,6 +1,8 @@
 {
   "expo": {
     "name": "PetChaos",
+    other existing settings
+    "entryPoint":"./index.js", 
     "slug": "petchaos",
     "scheme": "petchaos",
     "version": "0.1.0",
