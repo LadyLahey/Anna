@@ -4,7 +4,6 @@
     "slug": "petchaos",
     "scheme": "petchaos",
     "version": "0.1.0",
-    "entryPoint": "./index.js",
     "orientation": "portrait",
     "splash": {
       "resizeMode": "contain",

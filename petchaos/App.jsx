@@ -11,9 +11,8 @@ import PetProfileScreen from './src/screens/PetProfileScreen';
 import MinigamesScreen from './src/screens/MinigamesScreen';
 import QuestsScreen from './src/screens/QuestsScreen';
 import { AppStateProvider } from './src/state/AppState';
-import { RootStackParamList } from './src/navigation/types';
 
-const Stack = createNativeStackNavigator<RootStackParamList>();
+const Stack = createNativeStackNavigator();
 
 export default function App() {
 	return (
